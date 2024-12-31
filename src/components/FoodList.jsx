@@ -2,26 +2,24 @@ import { useEffect, useState, useContext } from "react";
 import { currencyFormatter } from "../util/formatting";
 import Button from "../UI/Button";
 import CartContext from "../contexts/cart-context";
+import useHttp from "./hooks/usehttp";
+import Error from "./Error";
+
+const requestConfig = {};
 
 function FoodList() {
   const cartCtx = useContext(CartContext);
-  const [meals, setMeals] = useState([]);
 
-  useEffect(() => {
-    async function fetchMeals() {
-      try {
-        const response = await fetch("http://localhost:3000/meals");
-        if (!response.ok) throw new Error("Network response was not ok");
-        const data = await response.json();
-        console.log(data);
-        setMeals(data);
-      } catch (error) {
-        console.log("Error:", error.message);
-      }
-    }
 
-    fetchMeals();
-  }, []);
+  const { data: meals, isLoading, error} = useHttp('http://localhost:3000/meals', requestConfig, []);
+
+  if (isLoading) {
+    return <p style={{textAlign: "center"}}>Loading meals...</p>;
+  }
+
+  if (error) {
+    return <Error message={error} title = "Failed to load meals."/>
+  }
 
   function handleAddToCart(meal) {
     cartCtx.addItem(meal);
