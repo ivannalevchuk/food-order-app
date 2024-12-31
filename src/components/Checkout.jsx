@@ -18,46 +18,46 @@ const requestConfig = {
 function Checkout() {
   const modalCtx = useContext(ModalContext);
   const cartCtx = useContext(CartContext);
-  const [isOrderSent, setIsOrderSent] = useState(false);
 
   const totalAmount = cartCtx.mealItems.reduce((acc, item) => {
     return acc + item.price * item.amount;
   }, 0);
 
-  const {
-    data,
-    error,
-    sendRequest,
-  } = useHttp("http://localhost:3000/orders", requestConfig, []);
-
-
+  const { data, error, sendRequest, clearData, clearError } = useHttp(
+    "http://localhost:3000/orders",
+    requestConfig,
+    []
+  );
 
   function closeModalHandler() {
     modalCtx.closeCheckout();
+    clearError();
   }
 
   function finishCheckout() {
     cartCtx.clearCart();
     modalCtx.closeCheckout();
-    setIsOrderSent(false);
+    clearData();
+
   }
 
   async function checkoutAction(prevFormData, formData) {
-
     const customerData = Object.fromEntries(formData.entries()); // {name: "John Doe", ...}
 
-    await sendRequest({
-      order: { items: cartCtx.mealItems, customer: customerData },
-    });
-
-    if (!error) {
-      setIsOrderSent(true);
-    }
+    await sendRequest(
+      JSON.stringify({
+        order: { items: cartCtx.mealItems, customer: customerData },
+      })
+    );
   }
 
-  const [formState, formAction, isSending] = useActionState(checkoutAction, null);
-
-  if (isOrderSent) {
+  const [formState, formAction, isSending] = useActionState(
+    checkoutAction,
+    null
+  );
+  console.log ("data: ", data)
+  console.log(data, error);
+  if (data.message && !error) {
     return (
       <Modal
         open={modalCtx.progress === "checkout"}

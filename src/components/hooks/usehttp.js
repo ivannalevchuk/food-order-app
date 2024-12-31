@@ -15,6 +15,14 @@ function useHttp(url, config, initialData) {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  function clearError() {
+    setError(null);
+  }
+
+  function clearData() {
+    setData(initialData);
+  }
+
 
   const sendRequest = useCallback(async function sendRequest(data) {
     setIsLoading(true);
@@ -22,7 +30,7 @@ function useHttp(url, config, initialData) {
       const response = await httpRequest(url, {
         method: config.method ? config.method : "GET",
         headers: config.headers ? config.headers : {},
-        body: data ? JSON.stringify(data) : null,
+        body: data,
       });
       setData(response);
     } catch (error) {
@@ -42,6 +50,8 @@ function useHttp(url, config, initialData) {
     error,
     isLoading,
     sendRequest,
+    clearError,
+    clearData
   };
 }
 
